@@ -1,0 +1,57 @@
+// Mengatur agar web app menampilkan file HTML
+function doGet() {
+  return HtmlService.createTemplateFromFile('index')
+    .evaluate()
+    .setTitle('Asesmen Awal PAI Kelas VIII: Amanah & Jujur')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+// Fungsi untuk menyimpan data ke Google Spreadsheet
+function simpanHasil(data) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheetHasil = ss.getSheetByName('HASIL ASESMEN');
+    
+    // Jika sheet belum ada, buat baru beserta header
+    if (!sheetHasil) {
+      sheetHasil = ss.insertSheet('HASIL ASESMEN');
+      sheetHasil.appendRow([
+        'Nomor', 'Tanggal', 'Nama Murid', 'Kelas',
+        'Jawaban 1', 'Jawaban 2', 'Jawaban 3', 'Jawaban 4', 'Jawaban 5',
+        'Jawaban 6', 'Jawaban 7', 'Jawaban 8', 'Jawaban 9', 'Jawaban 10',
+        'Jumlah Benar', 'Jumlah Salah', 'Skor (%)', 'Kategori Pemahaman'
+      ]);
+    }
+    
+    const lastRow = Math.max(1, sheetHasil.getLastRow());
+    const no = lastRow === 1 ? 1 : lastRow;
+    const tanggal = new Date().toLocaleString('id-ID');
+    
+    const rowData = [
+      no,
+      tanggal,
+      data.nama,
+      data.kelas,
+      data.jawaban[0] || '',
+      data.jawaban[1] || '',
+      data.jawaban[2] || '',
+      data.jawaban[3] || '',
+      data.jawaban[4] || '',
+      data.jawaban[5] || '',
+      data.jawaban[6] || '',
+      data.jawaban[7] || '',
+      data.jawaban[8] || '',
+      data.jawaban[9] || '',
+      data.benar,
+      data.salah,
+      data.skor,
+      data.kategori
+    ];
+    
+    sheetHasil.appendRow(rowData);
+    return { status: 'success', message: 'Data berhasil disimpan!' };
+  } catch (error) {
+    return { status: 'error', message: error.toString() };
+  }
+}
